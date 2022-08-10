@@ -44,12 +44,29 @@ class Board:
             recv_line = self.port.readline().decode('utf-8').strip()
             if len(recv_line):
                 logging.debug(recv_line)
-                print(recv_line)
                 if 'PORT: 1; RX: "' in recv_line:
                     # this is a downlink message
                     data = recv_line.split('"')[-2]
-                    print(f'Downlink message {data}')
+                    logging.debug(f'Downlink message: {data}')
+                    # convert data to a bytes object and call the downlink callback
+                    if self.downlink_callback:
+                        data_bytes = bytes.fromhex(data)
+                        self.downlink_callback(data_bytes)
 
+
+    def send_uplink(self, data_list):
+        """Creates and sends an uplink message through the E5. 'data_list' is used to create the
+        message.  'data_list' is an iterable of two-tuples; the first item of the tuple is 
+        a non-negative integer data value and the second item is the number of bytes to use to encode the
+        integer data value.  For example: (110, 2) will send the value 110 as a 2 byte integer.
+        All of the encoded integers in 'data_list' will be concatenated together to make
+        the message.
+        """
+        msg = ''
+        for val, encode_len in data_list:
+            msg += f'%0{encode_len * 2}X' % val
+
+        self.add_command(f'MSGHEX="{msg}"')
 
     def add_command(self, cmd):
         """Adds a command to the queue to be sent to the E5 board.  'cmd' is a string;
@@ -61,3 +78,9 @@ class Board:
         """Changes the Data Rate of the E5 board
         """
         self.cmd_q.put(f'DR={dr}')
+
+def to_int(bytes_obj: bytes):
+    """Converts a bytes object 'bytes_obj' to an integer assuming MSB is stored
+    at the beginning of the bytes object.
+    """
+    return int.from_bytes(bytes_obj, 'big')
