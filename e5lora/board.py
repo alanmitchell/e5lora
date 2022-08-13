@@ -9,6 +9,8 @@ from serial import Serial
 
 
 class Board:
+    """Class that writes and reads from the E5 board.
+    """
 
     def __init__(
         self,
@@ -24,6 +26,8 @@ class Board:
 
         # set up a Queue to accept commands to send to E5 module
         self.cmd_q = queue.SimpleQueue()
+
+        # start the thread that communicates with the board through the serial port.
         threading.Thread(target=self.run, daemon=True).start()
 
     def run(self):
@@ -41,6 +45,8 @@ class Board:
             except Exception as err:
                 logging.exception('Error accessing command queue.')
 
+            # if there is no data, this blocks for the port timeout duration set in the
+            # __init__ routine.  This delay is needed to keep the loop frequency reasonable.
             recv_line = self.port.readline().decode('utf-8').strip()
             if len(recv_line):
                 logging.debug(recv_line)

@@ -1,1 +1,4 @@
-__version__ = '1.0.0'
+__version__ = '0.9.0'
+
+# make the Board class available for a top-level import.
+from .board import Board
