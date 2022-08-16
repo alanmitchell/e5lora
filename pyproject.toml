@@ -1,4 +1,11 @@
 # pyproject.toml
+# See: https://realpython.com/pypi-publish-python-package/ for info on how 
+# to configure and deploy the package on PyPI.
+
+# To build the package for deployment:
+# python -m build
+# twine upload -r testpypi dist/*          for testing the upload process
+# twine upload dist/*                      for the real upload to PyPi
 
 [build-system]
 requires = ["setuptools>=61.0.0", "wheel"]
